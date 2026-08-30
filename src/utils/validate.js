@@ -43,4 +43,15 @@ const validateLogin = (req) => {
     throw new Error(`password field not present`);
 };
 
-module.exports = { validateSignIn, validateUpdate, validateLogin };
+const validateIncomingCookie = (req) => {
+  if (req.cookies?.token != "sampletokendfromserver") {
+    throw new Error("Authentication Failed");
+  }
+};
+
+module.exports = {
+  validateSignIn,
+  validateUpdate,
+  validateLogin,
+  validateIncomingCookie,
+};
