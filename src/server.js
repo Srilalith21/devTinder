@@ -6,7 +6,7 @@ const app = express();
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const generator = require("./utils/tokengenerator");
-
+const authenticate = require("../src/middlewares/auth.middleware");
 /**
  * Config Dotenv
  */
@@ -81,18 +81,15 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", authenticate.authenticateUser, async (req, res) => {
   try {
-    // Validate the (SAMPLE JWT TOKEN)
-    const { _id } = await validate.validateIncomingCookie(req);
-
-    const userData = await User.findById(_id);
-    if (!userData) throw new Error("Invalid credentials");
+    
+    if (!req.USER_DATA) throw new Error("No results found");
 
     res.status(200).send({
       status: true,
       token: "valid",
-      profile: userData,
+      profile: req?.USER_DATA,
     });
   } catch (error) {
     res.status(401).send(`${error.message}`);
