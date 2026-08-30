@@ -46,20 +46,8 @@ const validateLogin = (req) => {
     throw new Error(`password field not present`);
 };
 
-const validateIncomingCookie = async (req) => {
-  if (!req.cookies.token) {
-    throw new Error("Authentication Failed");
-  }
-  const decodedData = await jwt.verify(
-    req.cookies.token,
-    process.env.SECRET_KEY,
-  );
-  return decodedData;
-};
-
 module.exports = {
   validateSignIn,
   validateUpdate,
   validateLogin,
-  validateIncomingCookie,
 };
