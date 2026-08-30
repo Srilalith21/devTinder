@@ -1,4 +1,7 @@
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const path = require("path");
+require("dotenv").config(path.join(__dirname, "../.env"));
 
 const validateSignIn = (req) => {
   const { firstName, lastName, email, password } = req.body;
@@ -43,10 +46,15 @@ const validateLogin = (req) => {
     throw new Error(`password field not present`);
 };
 
-const validateIncomingCookie = (req) => {
-  if (req.cookies?.token != "sampletokendfromserver") {
+const validateIncomingCookie = async (req) => {
+  if (!req.cookies.token) {
     throw new Error("Authentication Failed");
   }
+  const decodedData = await jwt.verify(
+    req.cookies.token,
+    process.env.SECRET_KEY,
+  );
+  return decodedData;
 };
 
 module.exports = {

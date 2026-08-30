@@ -5,6 +5,7 @@ const validate = require("./utils/validate");
 const app = express();
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
+const generator = require("./utils/tokengenerator");
 
 /**
  * Config Dotenv
@@ -51,14 +52,25 @@ app.post("/login", async (req, res) => {
 
   try {
     validate.validateLogin(req); // validate wheather the fields exists
+
     const userData = await User.findOne({ email: email });
     if (!userData) throw new Error("Invalid Credentials");
+
     // If Email is valid check the password
     const isPasswordValid = await bcrypt.compare(password, userData.password);
     if (!isPasswordValid) throw new Error("Invalid Credentials");
 
-    // Integrating simple auth system with known token value
-    res.cookie("token", "sampletokendfromserver"); // This is for learning purpose only
+    const token = await generator.tokenGenerator(
+      { _id: userData._id },
+      process.env.SECRET_KEY,
+    );
+
+    if (!token)
+      throw new Error({
+        error: "Authentication failed. Please check your credentials.",
+      });
+
+    res.cookie("token", token);
     res.send({
       status: true,
       verified: ["email", "password"],
@@ -69,17 +81,18 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.get("/profile", (req, res) => {
+app.get("/profile", async (req, res) => {
   try {
     // Validate the (SAMPLE JWT TOKEN)
-    validate.validateIncomingCookie(req);
+    const { _id } = await validate.validateIncomingCookie(req);
+
+    const userData = await User.findById(_id);
+    if (!userData) throw new Error("Invalid credentials");
+
     res.status(200).send({
       status: true,
       token: "valid",
-      profiles: [
-        { name: "coderSri", age: 20 },
-        { name: "sri", age: 20 },
-      ],
+      profile: userData,
     });
   } catch (error) {
     res.status(401).send(`${error.message}`);
