@@ -87,7 +87,7 @@ app.get("/profile", async (req, res) => {
     const { _id } = await validate.validateIncomingCookie(req);
 
     const userData = await User.findById(_id);
-    if (!userData) throw new Error("Invalid credentials");
+    if (!userData) throw new Error("User does not exist");
 
     res.status(200).send({
       status: true,
