@@ -6,13 +6,15 @@ require("dotenv").config(path.join(__dirname, "../.env"));
 async function authenticateUser(req, res, next) {
   try {
     const cookie = req?.cookies;
+
     // check for valid cookie
     if (!cookie) throw new Error("Authentication failed please login back");
     // Decoding the token
     const decodedData = await jwt.verify(cookie.token, process.env.SECRET_KEY);
-    const { _id } = decodedData;
-    if (!_id) throw new Error("User Not Found");
-    const userData = await User.findById(_id);
+
+    const userId = decodedData;
+    if (!userId) throw new Error("User Not Found");
+    const userData = await User.findById({ _id: userId });
     // check if the user existance in the database
     if (!userData) throw new Error("User Not Found");
     req.USER_DATA = userData;
