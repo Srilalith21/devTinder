@@ -55,21 +55,11 @@ app.post("/login", async (req, res) => {
     const userData = await User.findOne({ email: email });
     if (!userData) throw new Error("Invalid Credentials");
 
-    // If Email is valid check the password
-    const isPasswordValid = await bcrypt.compare(password, userData.password);
-    if (!isPasswordValid) throw new Error("Invalid Credentials");
+    userData.validatePassword(password);
 
-    const token = await generator.tokenGenerator(
-      { _id: userData._id },
-      process.env.SECRET_KEY,
-    );
+    const token = await userData.getJWT();
 
-    if (!token)
-      throw new Error({
-        error: "Authentication failed. Please check your credentials.",
-      });
-
-    res.cookie("token", token);
+    res.cookie("token", token, { expires: new Date(Date.now() + 900000) }); // cookie expires in 15 minutes
     res.send({
       status: true,
       verified: ["email", "password"],

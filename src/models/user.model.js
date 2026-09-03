@@ -1,5 +1,9 @@
 const mongoose = require("mongoose");
 const validator = require("validator");
+const jwt = require("jsonwebtoken");
+const path = require("path");
+const bcrypt = require("bcrypt");
+require("dotenv").config(path.join(__dirname, "../.env"));
 
 const USER_STRUCTURE = {
   firstName: { type: String },
@@ -51,5 +55,20 @@ const USER_STRUCTURE = {
 };
 
 const userSchema = new mongoose.Schema(USER_STRUCTURE, { timestamps: true });
+
+// Mongoose Schema methods
+userSchema.methods.getJWT = async function () {
+  const user = this;
+  const token = await jwt.sign(user._id.toString(), process.env.SECRET_KEY);
+  if (!token)
+    throw new Error("Authentication failed. Please check your credentials.");
+  return token;
+};
+
+userSchema.methods.validatePassword = async function (plainPassword) {
+  const isValidPassword = await bcrypt.compare(plainPassword, this.password);
+  if (!isValidPassword) throw new Error("Invalid Credentials");
+};
+
 const User = mongoose.model("users", userSchema);
 module.exports = User;
