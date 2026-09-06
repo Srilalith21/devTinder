@@ -4,19 +4,25 @@ const path = require("path");
 require("dotenv").config(path.join(__dirname, "../.env"));
 
 async function authenticateUser(req, res, next) {
-  try {
-    const cookie = req?.cookies;
+  /*** This function checks wheather the user is valid or not
+   * vheck the cookie in from the request
+   * decode the token
+   * check if the user exists in the database
+   */
 
-    // check for valid cookie
-    if (!cookie) throw new Error("Authentication failed please login back");
-    // Decoding the token
-    const decodedData = await jwt.verify(cookie.token, process.env.SECRET_KEY);
+  try {
+    const token = req.cookies?.token;
+
+    if (!token) throw new Error("Authentication failed please login back");
+
+    const decodedData = await jwt.verify(token, process.env.SECRET_KEY);
 
     const userId = decodedData;
     if (!userId) throw new Error("User Not Found");
+
     const userData = await User.findById({ _id: userId });
-    // check if the user existance in the database
     if (!userData) throw new Error("User Not Found");
+
     req.USER_DATA = userData;
   } catch (err) {
     return res.status(400).send(`${err.message}`);

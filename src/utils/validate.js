@@ -3,26 +3,65 @@ const jwt = require("jsonwebtoken");
 const path = require("path");
 require("dotenv").config(path.join(__dirname, "../.env"));
 
-const validateSignIn = (req) => {
-  const { firstName, lastName, email, password } = req.body;
+/**
+ * Validates the incoming request for the login route
+ */
+const validateLogin = (req, res, next) => {
+  try {
+    const { email, password } = req?.body;
+    if (!email) throw new Error(`email field not present`);
+    if (!password) throw new Error(`password field not present`);
 
-  if (!firstName || !lastName) {
-    throw new Error("First name and last name are required");
+    const isEmail = validator.isEmail(email);
+    const isPassword = validator.isEmpty(password);
+
+    if (!isEmail) throw new Error("please enter valid email id");
+    if (isPassword) throw new Error("password field cannot be empty");
+  } catch (error) {
+    res.status(400).send(`Login Failed : ${error.message}`);
   }
-  if (!email) {
-    throw new Error("Email is required");
-  }
-  if (!validator.isStrongPassword(password)) {
-    throw new Error(
-      `Password is not strong enough. It must contain at least 8 characters, including uppercase, lowercase, number, and symbol.`,
-    );
-  }
+  next();
 };
 
-const validateUpdate = (req) => {
+const validateSignIn = (req, res, next) => {
+  try {
+    const { firstName, lastName, email, password } = req?.body;
+
+    // Validation Constraints
+    if (!firstName) {
+      throw new Error("First name and last name are required");
+    }
+    if (validator.isEmpty(firstName)) {
+      throw new Error("First name cannot be Empty");
+    }
+    if (!email) {
+      throw new Error("Email is required");
+    }
+    if (!validator.isEmail(email)) {
+      throw new Error("Please enter valid email");
+    }
+    if (!validator.isStrongPassword(password)) {
+      throw new Error(
+        `Password is not strong enough. It must contain at least 8 characters, including uppercase, lowercase, number, and symbol.`,
+      );
+    }
+  } catch (err) {
+    res.status(400).send(`Validation Failed : ${err.message}`);
+  }
+  next();
+};
+
+const validateEditData = (req) => {
   const update = req?.body;
 
-  const ALLOWED_UPDATES = ["firstName", "lastName", "age", "phone", "skills"];
+  const ALLOWED_UPDATES = [
+    "firstName",
+    "lastName",
+    "age",
+    "phone",
+    "skills",
+    "about",
+  ];
   if (!Object.keys(update).every((key) => ALLOWED_UPDATES.includes(key))) {
     throw new Error(
       `Invalid update keys. Allowed keys are: ${ALLOWED_UPDATES.join(", ")}`,
@@ -39,15 +78,27 @@ const validateUpdate = (req) => {
     throw new Error("Skills cannot be more than 10");
 };
 
-const validateLogin = (req) => {
-  const { email, password } = req?.body;
-  if (!email || email == "") throw new Error(`email field not present`);
-  if (!password || password == "")
-    throw new Error(`password field not present`);
+const validatePasswordUpdateFields = (req) => {
+  const ALLOWED_FIELDS = ["currentPassword", "newPassword"];
+
+  const { currentPassword, newPassword } = req?.body;
+  if (!currentPassword) throw new Error("Required currentPassword field");
+  if (!newPassword) throw new Error("Required newPassword field");
+
+  if (Object.keys(req.body).length > 2)
+    throw new Error(
+      `Extra Fields not allowed appart from ${ALLOWED_FIELDS.join(",")}`,
+    );
+
+  if (validator.isEmpty(currentPassword))
+    throw new Error("curretPassword field is empty");
+  if (validarot.isEmpty(newPassword))
+    throw new Error("newPassword field is empty");
 };
 
 module.exports = {
   validateSignIn,
-  validateUpdate,
+  validateEditData,
   validateLogin,
+  validatePasswordUpdateFields,
 };

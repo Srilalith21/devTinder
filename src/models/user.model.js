@@ -52,11 +52,15 @@ const USER_STRUCTURE = {
   },
   skills: { type: [String] },
   phone: { type: Number },
+  about: { type: String, default: "This is default about!" },
 };
 
 const userSchema = new mongoose.Schema(USER_STRUCTURE, { timestamps: true });
 
-// Mongoose Schema methods
+/**
+ * Mongoose Schema methods
+ */
+
 userSchema.methods.getJWT = async function () {
   const user = this;
   const token = await jwt.sign(user._id.toString(), process.env.SECRET_KEY);

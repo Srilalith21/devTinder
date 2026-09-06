@@ -7,6 +7,12 @@ const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const generator = require("./utils/tokengenerator");
 const authenticate = require("../src/middlewares/auth.middleware");
+const mongoose = require("mongoose");
+/**
+ * Router Files import
+ */
+const authRouter = require("./routes/auth.router");
+const profileRouter = require("./routes/profile.router");
 /**
  * Config Dotenv
  */
@@ -18,71 +24,11 @@ require("dotenv").config();
 app.use(express.json());
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
-  res.send("Hello from the server");
-});
-
-app.post("/signin", async (req, res) => {
-  try {
-    const { firstName, lastName, email, password } = req.body;
-
-    // Validate the request body
-    validate.validateSignIn(req);
-
-    // Encrypt the password before saving to the database
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    const user = await User.create({
-      firstName,
-      lastName,
-      email,
-      password: passwordHash,
-    });
-    const insertedUser = await user.save();
-    res.status(201).send(insertedUser);
-  } catch (err) {
-    res.status(500).send(`Insertion Failed: ${err.message}`);
-  }
-});
-
-// LOGIN request
-app.post("/login", async (req, res) => {
-  const { email, password } = req?.body;
-
-  try {
-    validate.validateLogin(req); // validate wheather the fields exists
-
-    const userData = await User.findOne({ email: email });
-    if (!userData) throw new Error("Invalid Credentials");
-
-    userData.validatePassword(password);
-
-    const token = await userData.getJWT();
-
-    res.cookie("token", token, { expires: new Date(Date.now() + 900000) }); // cookie expires in 15 minutes
-    res.send({
-      status: true,
-      verified: ["email", "password"],
-      message: "Login Successful",
-    });
-  } catch (err) {
-    res.status(400).send(`Login Failed : ${err.message}`);
-  }
-});
-
-app.get("/profile", authenticate.authenticateUser, async (req, res) => {
-  try {
-    if (!req.USER_DATA) throw new Error("No results found");
-
-    res.status(200).send({
-      status: true,
-      token: "valid",
-      profile: req?.USER_DATA,
-    });
-  } catch (error) {
-    res.status(401).send(`${error.message}`);
-  }
-});
+/**
+ * Mounting the route files
+ */
+app.use("/auth", authRouter);
+app.use("/profile", profileRouter);
 
 app.patch("/user/:userId", async (req, res) => {
   const user_id = req.params?.userId;
@@ -111,4 +57,5 @@ connectToDatabase()
   })
   .catch((err) => {
     console.error("Error connecting to the database", err);
+    mongoose.disconnect();
   });
