@@ -13,6 +13,7 @@ const mongoose = require("mongoose");
  */
 const authRouter = require("./routes/auth.router");
 const profileRouter = require("./routes/profile.router");
+const requestRouter = require("./routes/request.router");
 /**
  * Config Dotenv
  */
@@ -29,24 +30,7 @@ app.use(cookieParser());
  */
 app.use("/auth", authRouter);
 app.use("/profile", profileRouter);
-
-app.patch("/user/:userId", async (req, res) => {
-  const user_id = req.params?.userId;
-  const update = req?.body;
-
-  try {
-    // Validate the update request
-    validate.validateUpdate(req);
-
-    const updatedUser = await User.findByIdAndUpdate(user_id, update, {
-      returnDocument: "after",
-      runValidators: true,
-    });
-    res.status(200).send(updatedUser);
-  } catch (err) {
-    res.status(400).send(`Update Failed: ${err.message}`);
-  }
-});
+app.use("/request", requestRouter);
 
 connectToDatabase()
   .then(() => {

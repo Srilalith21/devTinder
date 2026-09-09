@@ -2,6 +2,7 @@ const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const path = require("path");
 require("dotenv").config(path.join(__dirname, "../.env"));
+const mongoose = require("mongoose");
 
 /**
  * Validates the incoming request for the login route
@@ -96,9 +97,19 @@ const validatePasswordUpdateFields = (req) => {
     throw new Error("newPassword field is empty");
 };
 
+const validateConnectionRequest = (req) => {
+  if (req.params.status != "intrested" && req.params.status != "ignored") {
+    throw new Error("Satus can only be intrested or ignored");
+  }
+  if (!mongoose.isValidObjectId(req.params.toUserId)) {
+    throw new Error("User id is not valid");
+  }
+};
+
 module.exports = {
   validateSignIn,
   validateEditData,
   validateLogin,
   validatePasswordUpdateFields,
+  validateConnectionRequest,
 };
