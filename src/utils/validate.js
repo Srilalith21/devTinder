@@ -93,16 +93,25 @@ const validatePasswordUpdateFields = (req) => {
 
   if (validator.isEmpty(currentPassword))
     throw new Error("curretPassword field is empty");
-  if (validarot.isEmpty(newPassword))
+  if (validaror.isEmpty(newPassword))
     throw new Error("newPassword field is empty");
 };
 
 const validateConnectionRequest = (req) => {
   if (req.params.status != "intrested" && req.params.status != "ignored") {
-    throw new Error("Satus can only be intrested or ignored");
+    throw new Error("status can only be intrested or ignored");
   }
   if (!mongoose.isValidObjectId(req.params.toUserId)) {
     throw new Error("User id is not valid");
+  }
+};
+
+const validateReviewQueryParams = (req) => {
+  if (req.params.status != "accepted" && req.params.status != "rejected") {
+    throw new Error("status can only be accepted or rejected");
+  }
+  if (!mongoose.isValidObjectId(req.params.requestId)) {
+    throw new Error("Request id is not valid");
   }
 };
 
@@ -112,4 +121,5 @@ module.exports = {
   validateLogin,
   validatePasswordUpdateFields,
   validateConnectionRequest,
+  validateReviewQueryParams,
 };

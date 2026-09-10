@@ -77,9 +77,9 @@ router.patch("/password/update", authenticateUser, async (req, res) => {
       process.env.SECRET_KEY,
     );
 
-    if (!newPassword) res.status(500).send("new password hash not created");
+    if (!newPasswordHash) res.status(500).send("new password hash not created");
 
-    user.password = newPassword;
+    user.password = newPasswordHash;
 
     const updatedUser = await user.save();
 

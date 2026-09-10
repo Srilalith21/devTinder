@@ -30,7 +30,7 @@ router.post("/login", validate.validateLogin, async (req, res) => {
 
     if (!user) throw new Error("Invalid credentials");
 
-    const isValidPassword = user.validatePassword(password);
+    const isValidPassword = await user.validatePassword(password);
     if (!isValidPassword) throw new Error("Invalid credentials");
 
     const token = await user.getJWT();
@@ -92,7 +92,7 @@ router.post("/logout", (req, res) => {
   /**
    * Remove the cookies from client browser
    */
-  res.cookie("token", null, { expires: new Date(Date.now()) });
+  res.clearCookie("token");
   res.send("Logout succesful");
 });
 

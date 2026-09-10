@@ -5,7 +5,6 @@ const validate = require("./utils/validate");
 const app = express();
 const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
-const generator = require("./utils/tokengenerator");
 const authenticate = require("../src/middlewares/auth.middleware");
 const mongoose = require("mongoose");
 /**

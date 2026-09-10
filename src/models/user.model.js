@@ -71,7 +71,7 @@ userSchema.methods.getJWT = async function () {
 
 userSchema.methods.validatePassword = async function (plainPassword) {
   const isValidPassword = await bcrypt.compare(plainPassword, this.password);
-  if (!isValidPassword) throw new Error("Invalid Credentials");
+  return isValidPassword;
 };
 
 const User = mongoose.model("users", userSchema);

@@ -1,7 +1,10 @@
 const express = require("express");
 const { authenticateUser } = require("../middlewares/auth.middleware");
 const ConnectionRequest = require("../models/request.model");
-const { validateConnectionRequest } = require("../utils/validate");
+const {
+  validateConnectionRequest,
+  validateReviewQueryParams,
+} = require("../utils/validate");
 
 const router = express.Router();
 
@@ -37,7 +40,6 @@ router.post("/send/:status/:toUserId", authenticateUser, async (req, res) => {
     if (isConnectionConflict) {
       throw new Error("connection request is already received");
     }
-    console.log(isConnectionConflict);
 
     const requestData = new ConnectionRequest({
       fromUser,
@@ -56,6 +58,51 @@ router.post("/send/:status/:toUserId", authenticateUser, async (req, res) => {
   }
 });
 
-// router.post("/review/:status/:requestId");
+router.post(
+  "/review/:status/:requestId",
+  authenticateUser,
+  async (req, res) => {
+    try {
+      validateReviewQueryParams(req);
+
+      const loggedInUser = req.USER_DATA;
+      const { status, requestId } = req.params;
+
+      /**
+       * ----SEQUENCE----
+       * 1.The logged in user should be equal to the toUserId to accept or reject the connection Request
+       * 2.The requested ID should be valid and present in the database
+       *
+       */
+
+      const document = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUser: loggedInUser._id,
+        status: "intrested",
+      });
+
+      if (!document) {
+        return res.status(404).json({
+          message: "No data found",
+        });
+      }
+      document.status = status;
+      console.log(document);
+      const updatedRequestDocument = await document.save();
+      // console.log(updatedRequestDocument);
+
+      res.send({
+        message: `connection request ${status}`,
+        update_result: true,
+        data: updatedRequestDocument,
+      });
+    } catch (error) {
+      res.status(400).send({
+        message: `${error.message}`,
+        result: `Review failed`,
+      });
+    }
+  },
+);
 
 module.exports = router;
