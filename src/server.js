@@ -7,29 +7,32 @@ const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const authenticate = require("../src/middlewares/auth.middleware");
 const mongoose = require("mongoose");
+const morgan = require("morgan");
 /**
  * Router Files import
  */
 const authRouter = require("./routes/auth.router");
 const profileRouter = require("./routes/profile.router");
 const requestRouter = require("./routes/request.router");
+const userRouter = require("./routes/user.router");
 /**
  * Config Dotenv
  */
 require("dotenv").config();
 
 /**
- * Body Parser and cookie parser Middleware
+ * Body Parser, cookie parser and morgan
  */
 app.use(express.json());
 app.use(cookieParser());
-
+app.use(morgan("dev"));
 /**
  * Mounting the route files
  */
 app.use("/auth", authRouter);
 app.use("/profile", profileRouter);
 app.use("/request", requestRouter);
+app.use("/user", userRouter);
 
 connectToDatabase()
   .then(() => {

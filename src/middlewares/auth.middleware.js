@@ -13,7 +13,7 @@ async function authenticateUser(req, res, next) {
   try {
     const token = req.cookies?.token;
 
-    if (tokem.length <= 0 || !token)
+    if (!token || token.length <= 0)
       throw new Error("Invalid token please login back");
 
     const decodedData = await jwt.verify(token, process.env.SECRET_KEY);

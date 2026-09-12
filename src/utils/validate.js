@@ -47,7 +47,7 @@ const validateSignIn = (req, res, next) => {
       );
     }
   } catch (err) {
-    res.status(400).send(`Validation Failed : ${err.message}`);
+    return res.status(400).send(`Validation Failed : ${err.message}`);
   }
   next();
 };

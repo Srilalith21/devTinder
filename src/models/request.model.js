@@ -2,8 +2,16 @@ const mongoose = require("mongoose");
 
 const connectionRequestSchema = new mongoose.Schema(
   {
-    fromUser: { type: mongoose.Schema.Types.ObjectId, required: true },
-    toUser: { type: mongoose.Schema.Types.ObjectId, required: true },
+    fromUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "users",
+    },
+    toUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      ref: "users",
+    },
     status: {
       type: String,
       enum: {
@@ -22,7 +30,6 @@ const connectionRequestModel = mongoose.model(
 
 connectionRequestSchema.pre("save", async function () {
   const request = this;
-  const { fromUser, toUser } = request;
   // current person is sending the request to current person Edgecase handling
   if (request.fromUser.equals(request.toUser)) {
     throw new Error("cannot send request to yourself");
