@@ -53,6 +53,14 @@ const USER_STRUCTURE = {
   skills: { type: [String] },
   phone: { type: Number },
   about: { type: String, default: "This is default about!" },
+  photoUrl: {
+    type: String,
+    validate: (value) => {
+      if (!validator.isURL(value)) {
+        throw new Error("please provide valid photo URL");
+      }
+    },
+  },
 };
 
 const userSchema = new mongoose.Schema(USER_STRUCTURE, { timestamps: true });

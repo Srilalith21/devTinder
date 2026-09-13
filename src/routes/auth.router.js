@@ -35,7 +35,7 @@ router.post("/login", validate.validateLogin, async (req, res) => {
 
     const token = await user.getJWT();
 
-    res.cookie("token", token, { expires: new Date(Date.now() + 90000) });
+    res.cookie("token", token, { expires: new Date(Date.now() + 9000000) });
     res.send({
       message: "Login Success",
       profile: user,
